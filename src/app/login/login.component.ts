@@ -11,12 +11,33 @@ import {FormsModule} from "@angular/forms";
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
-  email: string | undefined;
+  username: string | undefined;
   password: string | undefined;
 
   constructor() { }
 
-  login() {
-    // login logic here
+  async login() {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+      "username": this.username,
+      "password": this.password
+    });
+
+    const requestOptions:RequestInit = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/login/", requestOptions);
+      const result = await response.json();
+      localStorage.setItem('token', result.token);
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 }
