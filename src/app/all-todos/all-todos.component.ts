@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {environment} from "../../../environments/environment";
 import {lastValueFrom} from "rxjs";
 import {FormsModule} from "@angular/forms";
@@ -18,15 +18,23 @@ import {NgClass, NgForOf} from "@angular/common";
 })
 export class AllTodosComponent {
   todos:any = [];
+  error:string | undefined;
 
   constructor(private http: HttpClient) { }
 
   async ngOnInit() {
-    this.todos = await this.lodeTodos();
+    try {
+      this.todos = await this.lodeTodos();
+    } catch (error) {
+      this.error = "Failed to load todos";
+    }
+
   }
 
   async lodeTodos() {
     const url = environment.apiUrl + "/todos/";
-    return lastValueFrom(this.http.get(url));
+    let headers = new HttpHeaders();
+    headers = headers.set('Authorization', 'Token ' + localStorage.getItem("token"));
+    return lastValueFrom(this.http.get(url, {headers: headers}));
   }
 }
